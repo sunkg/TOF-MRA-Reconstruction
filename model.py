@@ -167,7 +167,8 @@ class ReconModel(BaseModel):
                     loss_fidelity = F.l1_loss(rss(self.recs_complex[i]),self.Target_f_rss)+self.cfg.lambda0*F.l1_loss(utils.sens_expand(self.recs_complex[i], self.sens_maps), self.Target_Kspace_f)
                     self.local_fidelities.append(self.rhos[i]*loss_fidelity)
                     self.loss_fidelity += self.local_fidelities[-1]
-                    self.loss_evid += self.rhos[i]*NLL_loss(Target_img_f, self.recs_complex[i], self.vs[i], self.alphas[i])
+                    Target_img_comb = (Target_img_f * self.sens_maps.conj()).sum(dim=1, keepdim=True)
+                    self.loss_evid += self.rhos[i]*NLL_loss(Target_img_comb, self.recs_complex[i], self.vs[i], self.alphas[i])
 
                 self.loss_ssim = self.cfg.lambda1 * ssimloss(self.rec_rss, self.Target_f_rss)
                 self.loss_TV = TV_loss(torch.abs(self.sens_maps), self.cfg.lambda2)
